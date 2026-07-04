@@ -1,5 +1,5 @@
 /* Service worker: offline app shell. Bump CACHE_NAME to force an update. */
-var CACHE_NAME = "tagebuch-v1";
+var CACHE_NAME = "tagebuch-v2";
 var ASSETS = [
   "./",
   "./index.html",

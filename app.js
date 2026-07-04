@@ -29,10 +29,21 @@
     { key: "water", label: "Trinken" }
   ];
   var PAIR_KEYS = MACRO_FIELDS.concat(LIFE_FIELDS).map(function (f) { return f.key; });
-  var STRENGTH_FIELDS = [
-    { key: "planned", label: "geplant" },
-    { key: "done", label: "durchgeführt" },
-    { key: "progression", label: "Progression" }
+  // Yes/No tracker blocks shown on the daily page (same style as Krafttraining).
+  var TRACKERS = [
+    { key: "strength", title: "Krafttraining", fields: [
+      { key: "planned", label: "geplant" },
+      { key: "done", label: "durchgeführt" },
+      { key: "progression", label: "Progression" }
+    ] },
+    { key: "techLearning", title: "Tech lernen", fields: [
+      { key: "planned", label: "geplant" },
+      { key: "done", label: "durchgeführt" }
+    ] },
+    { key: "application", title: "Bewerbung", fields: [
+      { key: "planned", label: "geplant" },
+      { key: "done", label: "durchgeführt" }
+    ] }
   ];
 
   // ---------- date helpers ----------
@@ -84,7 +95,12 @@
   }
 
   function emptyEntry() {
-    var e = { weight: "", strength: { planned: null, done: null, progression: null }, wentWell: ["", "", ""], todayActions: ["", "", ""] };
+    var e = { weight: "", wentWell: ["", "", ""], todayActions: ["", "", ""] };
+    TRACKERS.forEach(function (t) {
+      var o = {};
+      t.fields.forEach(function (f) { o[f.key] = null; });
+      e[t.key] = o;
+    });
     for (var i = 0; i < PAIR_KEYS.length; i++) e[PAIR_KEYS[i]] = { target: "", actual: "" };
     return e;
   }
@@ -97,8 +113,13 @@
       var k = PAIR_KEYS[i];
       if (e[k] && (e[k].target || e[k].actual)) return true;
     }
-    var s = e.strength || {};
-    if (s.planned != null || s.done != null || s.progression != null) return true;
+    for (var t = 0; t < TRACKERS.length; t++) {
+      var o = e[TRACKERS[t].key];
+      if (o) {
+        var f = TRACKERS[t].fields;
+        for (var g = 0; g < f.length; g++) if (o[f[g].key] != null) return true;
+      }
+    }
     if ((e.wentWell || []).some(Boolean)) return true;
     if ((e.todayActions || []).some(Boolean)) return true;
     return false;
@@ -258,12 +279,15 @@
     var macros = MACRO_FIELDS.map(pairRowHtml).join("");
     var life = LIFE_FIELDS.map(pairRowHtml).join("");
 
-    var toggles = STRENGTH_FIELDS.map(function (s) {
-      return '' +
-        '<div class="tgroup"><span class="tl">' + s.label + '</span>' +
-          '<button class="pill" data-str="' + s.key + '" data-val="yes">ja</button>' +
-          '<button class="pill no" data-str="' + s.key + '" data-val="no">nein</button>' +
-        '</div>';
+    var trackerBlocks = TRACKERS.map(function (t) {
+      var tg = t.fields.map(function (s) {
+        return '' +
+          '<div class="tgroup"><span class="tl">' + s.label + '</span>' +
+            '<button class="pill" data-tracker="' + t.key + '" data-field="' + s.key + '" data-val="yes">ja</button>' +
+            '<button class="pill no" data-tracker="' + t.key + '" data-field="' + s.key + '" data-val="no">nein</button>' +
+          '</div>';
+      }).join("");
+      return '<div class="section-title">' + t.title + '</div><div class="toggles">' + tg + '</div>';
     }).join("");
 
     function reflBlock(list) {
@@ -292,8 +316,7 @@
         macros +
         '<div class="blockgap"></div>' +
         life +
-        '<div class="section-title">Krafttraining</div>' +
-        '<div class="toggles">' + toggles + '</div>' +
+        trackerBlocks +
         '<div class="section-title">Drei Dinge, die gestern gut liefen</div>' +
         '<div class="reflect">' + reflBlock("wentWell") + '</div>' +
         '<div class="section-title">Drei Dinge, die ich heute umsetze</div>' +
@@ -365,23 +388,28 @@
     }
 
     // toggles: set initial state, then update classes directly on click
-    STRENGTH_FIELDS.forEach(function (s) {
-      var yes = view.querySelector('[data-str="' + s.key + '"][data-val="yes"]');
-      var no = view.querySelector('[data-str="' + s.key + '"][data-val="no"]');
-      function paint(val) {
-        yes.className = "pill" + (val === true ? " on" : "");
-        no.className = "pill no" + (val === false ? " on no" : "");
-      }
-      paint(w.strength ? w.strength[s.key] : null);
-      yes.addEventListener("click", function () {
-        var e = ensureEntry();
-        e.strength[s.key] = e.strength[s.key] === true ? null : true;
-        persist(); paint(e.strength[s.key]);
-      });
-      no.addEventListener("click", function () {
-        var e = ensureEntry();
-        e.strength[s.key] = e.strength[s.key] === false ? null : false;
-        persist(); paint(e.strength[s.key]);
+    TRACKERS.forEach(function (t) {
+      t.fields.forEach(function (s) {
+        var sel = '[data-tracker="' + t.key + '"][data-field="' + s.key + '"]';
+        var yes = view.querySelector(sel + '[data-val="yes"]');
+        var no = view.querySelector(sel + '[data-val="no"]');
+        function paint(val) {
+          yes.className = "pill" + (val === true ? " on" : "");
+          no.className = "pill no" + (val === false ? " on no" : "");
+        }
+        paint(w[t.key] ? w[t.key][s.key] : null);
+        yes.addEventListener("click", function () {
+          var e = ensureEntry();
+          if (!e[t.key]) e[t.key] = {};
+          e[t.key][s.key] = e[t.key][s.key] === true ? null : true;
+          persist(); paint(e[t.key][s.key]);
+        });
+        no.addEventListener("click", function () {
+          var e = ensureEntry();
+          if (!e[t.key]) e[t.key] = {};
+          e[t.key][s.key] = e[t.key][s.key] === false ? null : false;
+          persist(); paint(e[t.key][s.key]);
+        });
       });
     });
   }
@@ -462,7 +490,7 @@
 
     var weightSeries = [], calSeries = [], proteinSeries = [];
     var sleepSum = 0, sleepN = 0, stepsSum = 0, stepsN = 0, waterSum = 0, waterN = 0;
-    var doneY = 0, doneTotal = 0;
+    var doneY = 0, doneTotal = 0, techY = 0, techTotal = 0, appY = 0, appTotal = 0;
 
     dates.forEach(function (d) {
       var e = entries[d], lbl = shortDE(d);
@@ -476,6 +504,8 @@
       var st = parseNum(e.steps.actual); if (st != null) { stepsSum += st; stepsN++; }
       var wa = parseNum(e.water.actual); if (wa != null) { waterSum += wa; waterN++; }
       if (e.strength && e.strength.done != null) { doneTotal++; if (e.strength.done === true) doneY++; }
+      if (e.techLearning && e.techLearning.done != null) { techTotal++; if (e.techLearning.done === true) techY++; }
+      if (e.application && e.application.done != null) { appTotal++; if (e.application.done === true) appY++; }
     });
 
     function fmt(v, dec) {
@@ -485,6 +515,8 @@
     var avgSteps = stepsN ? stepsSum / stepsN : null;
     var avgWater = waterN ? waterSum / waterN : null;
     var trainRate = doneTotal ? Math.round((doneY / doneTotal) * 100) : null;
+    var techRate = techTotal ? Math.round((techY / techTotal) * 100) : null;
+    var appRate = appTotal ? Math.round((appY / appTotal) * 100) : null;
 
     var legend = '<span class="legend"><span><i style="background:#B9B4D6"></i>Soll</span><span><i style="background:#574B90"></i>Ist</span></span>';
 
@@ -499,6 +531,8 @@
         '<div class="card"><div class="num">' + fmt(avgSteps) + '</div><div class="cl">\u00d8 Schritte</div></div>' +
         '<div class="card"><div class="num">' + (avgWater == null ? "–" : fmt(avgWater, 1)) + '</div><div class="cl">\u00d8 Trinken</div></div>' +
         '<div class="card"><div class="num">' + (trainRate == null ? "–" : trainRate + "%") + '</div><div class="cl">Training erledigt</div></div>' +
+        '<div class="card"><div class="num">' + (techRate == null ? "–" : techRate + "%") + '</div><div class="cl">Tech gelernt</div></div>' +
+        '<div class="card"><div class="num">' + (appRate == null ? "–" : appRate + "%") + '</div><div class="cl">Beworben</div></div>' +
         '</div>';
 
       var wc = lineChart(weightSeries, [{ key: "w", color: "#574B90", dots: true }]);
@@ -548,6 +582,7 @@
       "Fett Soll", "Fett Ist", "Kohlenhydrate Soll", "Kohlenhydrate Ist",
       "Schlaf Soll", "Schlaf Ist", "Schritte Soll", "Schritte Ist", "Trinken Soll", "Trinken Ist",
       "Training geplant", "Training durchgef\u00fchrt", "Progression",
+      "Tech geplant", "Tech durchgef\u00fchrt", "Bewerbung geplant", "Bewerbung durchgef\u00fchrt",
       "Gut 1", "Gut 2", "Gut 3", "Umsetzen 1", "Umsetzen 2", "Umsetzen 3"];
     function yn(b) { return b === true ? "ja" : b === false ? "nein" : ""; }
     function esc(v) {
@@ -564,7 +599,9 @@
         e.calories.target, e.calories.actual, e.protein.target, e.protein.actual,
         e.fat.target, e.fat.actual, e.carbs.target, e.carbs.actual,
         e.sleep.target, e.sleep.actual, e.steps.target, e.steps.actual, e.water.target, e.water.actual,
-        yn(e.strength.planned), yn(e.strength.done), yn(e.strength.progression),
+        yn(e.strength ? e.strength.planned : null), yn(e.strength ? e.strength.done : null), yn(e.strength ? e.strength.progression : null),
+        yn(e.techLearning ? e.techLearning.planned : null), yn(e.techLearning ? e.techLearning.done : null),
+        yn(e.application ? e.application.planned : null), yn(e.application ? e.application.done : null),
         e.wentWell[0], e.wentWell[1], e.wentWell[2], e.todayActions[0], e.todayActions[1], e.todayActions[2]
       ].map(esc);
       rows.push(r.join(";"));
