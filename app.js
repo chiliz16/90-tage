@@ -10,11 +10,100 @@
 
   var STORAGE_KEY = "fitness-journal-data";
 
+  // ~90 quotes about success/effort. Attributions are limited to verifiable
+  // public-domain sources; proverbs are marked as such; author-less entries are
+  // original lines (empty author => no author shown).
   var QUOTES = [
     { t: "Jeder Tag ist eine neue Chance, das zu tun, was du möchtest.", a: "Friedrich Schiller" },
     { t: "Es ist nicht genug zu wollen, man muss auch tun.", a: "Johann Wolfgang von Goethe" },
     { t: "Nicht weil es schwer ist, wagen wir es nicht, sondern weil wir es nicht wagen, ist es schwer.", a: "Seneca" },
-    { t: "Was mich nicht umbringt, macht mich stärker.", a: "Friedrich Nietzsche" }
+    { t: "Was mich nicht umbringt, macht mich stärker.", a: "Friedrich Nietzsche" },
+    { t: "Wer immer strebend sich bemüht, den können wir erlösen.", a: "Johann Wolfgang von Goethe" },
+    { t: "Was dem Weg im Wege steht, wird zum Weg.", a: "Mark Aurel" },
+    { t: "Du hast Macht über deinen Geist, nicht über äußere Ereignisse — darin liegt deine Stärke.", a: "Mark Aurel" },
+    { t: "Keine große Sache entsteht plötzlich.", a: "Epiktet" },
+    { t: "Nicht die Dinge beunruhigen uns, sondern unsere Urteile über die Dinge.", a: "Epiktet" },
+    { t: "Solange du lebst, lerne zu leben.", a: "Seneca" },
+    { t: "Das Feuer prüft das Gold, das Unglück die Starken.", a: "Seneca" },
+    { t: "Wer nicht weiß, welchen Hafen er ansteuert, für den ist kein Wind der richtige.", a: "Seneca" },
+    { t: "Es gibt keinen leichten Weg von der Erde zu den Sternen.", a: "Seneca" },
+    { t: "Eine Reise von tausend Meilen beginnt mit einem einzigen Schritt.", a: "Laotse" },
+    { t: "Der stete Tropfen höhlt den Stein.", a: "Ovid" },
+    { t: "Arbeit besiegt alles.", a: "Vergil — Labor omnia vincit" },
+    { t: "Sie können, weil sie glauben, dass sie können.", a: "Vergil" },
+    { t: "Wer angefangen hat, hat schon die Hälfte getan.", a: "Horaz" },
+    { t: "Nutze den Tag.", a: "Horaz — Carpe diem" },
+    { t: "Jeder Tag ist der Schüler des vorigen.", a: "Publilius Syrus" },
+    { t: "Der Langsamste, der sein Ziel nicht aus den Augen verliert, geht noch geschwinder als jener, der ohne Ziel umherirrt.", a: "Gotthold Ephraim Lessing" },
+    { t: "Habe Mut, dich deines eigenen Verstandes zu bedienen.", a: "Immanuel Kant — Sapere aude" },
+    { t: "Es muss anders werden, wenn es gut werden soll.", a: "Georg Christoph Lichtenberg" },
+    { t: "Wer aufhört, besser zu werden, hat aufgehört, gut zu sein.", a: "Marie von Ebner-Eschenbach" },
+    { t: "Das Vertrauen in dich selbst ist das erste Geheimnis des Erfolgs.", a: "Ralph Waldo Emerson" },
+    { t: "Fleiß ist die Mutter des Glücks.", a: "Benjamin Franklin" },
+    { t: "Genie ist ein Prozent Inspiration und neunundneunzig Prozent Transpiration.", a: "Thomas Edison" },
+    { t: "Ich bin nicht gescheitert. Ich habe nur zehntausend Wege gefunden, die nicht funktionieren.", a: "Thomas Edison" },
+    { t: "Nichts auf der Welt kann Beharrlichkeit ersetzen.", a: "Calvin Coolidge" },
+    { t: "Tu, was du kannst, mit dem, was du hast, dort, wo du bist.", a: "Theodore Roosevelt" },
+    { t: "Glaube, dass du es kannst, und du bist schon halb am Ziel.", a: "Theodore Roosevelt" },
+    { t: "Man muss nichts im Leben fürchten, man muss es nur verstehen.", a: "Marie Curie" },
+    { t: "Der Sieg gehört dem Beharrlichsten.", a: "Napoleon Bonaparte" },
+    { t: "Das Wort ‚unmöglich' steht nur im Wörterbuch der Narren.", a: "Napoleon Bonaparte" },
+    { t: "Wir sind, was wir wiederholt tun. Exzellenz ist daher keine Tat, sondern eine Gewohnheit.", a: "Will Durant" },
+    { t: "Wer nicht sät, wird nicht ernten.", a: "Sprichwort" },
+    { t: "Durch Mühsal zu den Sternen.", a: "Per aspera ad astra" },
+    { t: "Den Mutigen hilft das Glück.", a: "Fortes fortuna adiuvat" },
+    { t: "Eile mit Weile.", a: "Festina lente" },
+    { t: "Solange ich atme, hoffe ich.", a: "Dum spiro, spero" },
+    { t: "Ohne Fleiß kein Preis.", a: "Sprichwort" },
+    { t: "Übung macht den Meister.", a: "Sprichwort" },
+    { t: "Wer rastet, der rostet.", a: "Sprichwort" },
+    { t: "Von nichts kommt nichts.", a: "Sprichwort" },
+    { t: "Wer wagt, gewinnt.", a: "Sprichwort" },
+    { t: "Aller Anfang ist schwer.", a: "Sprichwort" },
+    { t: "Erst die Arbeit, dann das Vergnügen.", a: "Sprichwort" },
+    { t: "Was du heute kannst besorgen, das verschiebe nicht auf morgen.", a: "Sprichwort" },
+    { t: "Der frühe Vogel fängt den Wurm.", a: "Sprichwort" },
+    { t: "Morgenstund hat Gold im Mund.", a: "Sprichwort" },
+    { t: "Es ist noch kein Meister vom Himmel gefallen.", a: "Sprichwort" },
+    { t: "Wer will, findet Wege; wer nicht will, findet Gründe.", a: "Sprichwort" },
+    { t: "Wo ein Wille ist, ist auch ein Weg.", a: "Sprichwort" },
+    { t: "Jeder ist seines Glückes Schmied.", a: "Sprichwort" },
+    { t: "Geduld bringt Rosen.", a: "Sprichwort" },
+    { t: "Probieren geht über Studieren.", a: "Sprichwort" },
+    { t: "Rom wurde nicht an einem Tag erbaut.", a: "Sprichwort" },
+    { t: "Man wächst mit seinen Aufgaben.", a: "Sprichwort" },
+    { t: "Wer den Gipfel erreichen will, muss unten anfangen.", a: "Sprichwort" },
+    { t: "Kleine Schritte führen auch zum Ziel.", a: "Sprichwort" },
+    { t: "Beharrlichkeit überwindet allen Widerstand.", a: "Sprichwort" },
+    { t: "Wer A sagt, muss auch B sagen.", a: "Sprichwort" },
+    { t: "Disziplin ist, das zu tun, was du dir vorgenommen hast — auch wenn die Lust längst weg ist.", a: "" },
+    { t: "Der schwerste Schritt ist der aus der Tür. Alles danach ist leichter.", a: "" },
+    { t: "Konsequenz schlägt Intensität — zeig einfach jeden Tag auf.", a: "" },
+    { t: "Motivation bringt dich zum Start, Gewohnheit bringt dich ins Ziel.", a: "" },
+    { t: "Du musst es nicht gut machen. Du musst es nur machen.", a: "" },
+    { t: "Fortschritt ist selten laut. Meistens ist er nur beständig.", a: "" },
+    { t: "Was du heute übst, wird morgen leicht.", a: "" },
+    { t: "Ein durchschnittlicher Trainingstag schlägt jeden perfekten Plan, der nur im Kopf bleibt.", a: "" },
+    { t: "Die Tage, an denen du keine Lust hast, zählen am meisten.", a: "" },
+    { t: "Vergleich dich mit dir von gestern, nicht mit irgendwem.", a: "" },
+    { t: "Erst kommt die Anstrengung, dann das Können — nie umgekehrt.", a: "" },
+    { t: "Ziele setzt man einmal. Systeme lebt man täglich.", a: "" },
+    { t: "Niemand sieht die Arbeit. Alle sehen das Ergebnis.", a: "" },
+    { t: "Ein Prozent besser — jeden Tag.", a: "" },
+    { t: "Der Rückschlag ist Teil des Plans, nicht sein Ende.", a: "" },
+    { t: "Du bist näher dran, als es sich gerade anfühlt.", a: "" },
+    { t: "Mach den nächsten Schritt. Nur den einen.", a: "" },
+    { t: "Anfangen ist die halbe Miete — die andere Hälfte ist Dranbleiben.", a: "" },
+    { t: "Zwölf Wochen konsequent verändern mehr als ein Jahr Vorsätze.", a: "" },
+    { t: "Nicht jeder Tag ist stark. Aber jeder Tag zählt.", a: "" },
+    { t: "Ergebnisse folgen der Beständigkeit, nicht der Begeisterung.", a: "" },
+    { t: "Heute die Arbeit, für die dein zukünftiges Ich dir dankt.", a: "" },
+    { t: "Kleine Gewohnheiten, groß aufsummiert — das ist der ganze Trick.", a: "" },
+    { t: "Wer jeden Tag ein Stück besser wird, ist nicht zu stoppen.", a: "" },
+    { t: "Aufschieben kostet mehr Kraft als anfangen.", a: "" },
+    { t: "Der Plan ist nichts, das Dranbleiben ist alles.", a: "" },
+    { t: "Zeig auf — der Rest ergibt sich.", a: "" },
+    { t: "Dein Wille von heute ist die Freiheit von morgen.", a: "" }
   ];
 
   var MACRO_FIELDS = [
@@ -272,7 +361,7 @@
     } else {
       quoteBlock =
         '<p class="quote">' + escapeHtml(showCustom ? w.customQuote : rot.t) + '</p>' +
-        (showCustom ? '' : '<p class="qauthor">' + rot.a + '</p>') +
+        (showCustom || !rot.a ? '' : '<p class="qauthor">' + rot.a + '</p>') +
         '<button class="qedit" id="qedit" title="Zitat bearbeiten">&#9998;</button>';
     }
 
