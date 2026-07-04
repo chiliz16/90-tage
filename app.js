@@ -184,7 +184,7 @@
   }
 
   function emptyEntry() {
-    var e = { weight: "", wentWell: ["", "", ""], todayActions: ["", "", ""] };
+    var e = { weight: "", movement: "", wentWell: ["", "", ""], todayActions: ["", "", ""] };
     TRACKERS.forEach(function (t) {
       var o = {};
       t.fields.forEach(function (f) { o[f.key] = null; });
@@ -197,6 +197,7 @@
   function hasContent(e) {
     if (!e) return false;
     if (e.weight) return true;
+    if (e.movement) return true;
     if (e.customQuote) return true;
     for (var i = 0; i < PAIR_KEYS.length; i++) {
       var k = PAIR_KEYS[i];
@@ -406,6 +407,8 @@
         '<div class="blockgap"></div>' +
         life +
         trackerBlocks +
+        '<div class="section-title">Sonstige Bewegung</div>' +
+        '<div class="notewrap"><input class="lineinput noteinput" data-note="movement"></div>' +
         '<div class="section-title">Drei Dinge, die gestern gut liefen</div>' +
         '<div class="reflect">' + reflBlock("wentWell") + '</div>' +
         '<div class="section-title">Drei Dinge, die ich heute umsetze</div>' +
@@ -450,6 +453,12 @@
     weightInput.value = w.weight || "";
     weightInput.addEventListener("input", function () {
       ensureEntry().weight = this.value; persist();
+    });
+
+    var noteInput = view.querySelector('[data-note="movement"]');
+    noteInput.value = w.movement || "";
+    noteInput.addEventListener("input", function () {
+      ensureEntry().movement = this.value; persist();
     });
 
     var pairInputs = view.querySelectorAll("input[data-k]");
@@ -672,6 +681,7 @@
       "Schlaf Soll", "Schlaf Ist", "Schritte Soll", "Schritte Ist", "Trinken Soll", "Trinken Ist",
       "Training geplant", "Training durchgef\u00fchrt", "Progression",
       "Tech geplant", "Tech durchgef\u00fchrt", "Bewerbung geplant", "Bewerbung durchgef\u00fchrt",
+      "Sonstige Bewegung",
       "Gut 1", "Gut 2", "Gut 3", "Umsetzen 1", "Umsetzen 2", "Umsetzen 3"];
     function yn(b) { return b === true ? "ja" : b === false ? "nein" : ""; }
     function esc(v) {
@@ -691,6 +701,7 @@
         yn(e.strength ? e.strength.planned : null), yn(e.strength ? e.strength.done : null), yn(e.strength ? e.strength.progression : null),
         yn(e.techLearning ? e.techLearning.planned : null), yn(e.techLearning ? e.techLearning.done : null),
         yn(e.application ? e.application.planned : null), yn(e.application ? e.application.done : null),
+        e.movement || "",
         e.wentWell[0], e.wentWell[1], e.wentWell[2], e.todayActions[0], e.todayActions[1], e.todayActions[2]
       ].map(esc);
       rows.push(r.join(";"));
