@@ -53,3 +53,4 @@ Browser-Speicher gelöscht, sind sie weg. Exportiere daher ab und zu die CSV
 ---------
 Nach Änderungen an den Dateien in sw.js den Wert CACHE_NAME hochzählen
 (z. B. "tagebuch-v2"), damit der Cache neu geladen wird.
+
